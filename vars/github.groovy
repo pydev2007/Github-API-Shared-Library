@@ -1,5 +1,7 @@
 def gitRepo(Map config) {
-    withCredentials([credentialsID: "test", variable: 'TOKEN']) {
+    withCredentials([
+        string(credentialsId: 'test', variable: 'TOKEN')
+    ])  {
         sh """curl -L \
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer ${TOKEN}" \
