@@ -1,7 +1,9 @@
 def gitRepo(Map config) {
-    withCredentials([
-        string(credentialsId: 'test', variable: 'TOKEN')
-    ])  {
+    withCredentials([usernamePassword(
+                    credentialsId: 'JenkinsGTTest',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'TOKEN'
+                )])  {
         sh """curl -L \
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer ${TOKEN}" \
