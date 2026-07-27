@@ -5,7 +5,7 @@ def gitRepo(Map config) {
                     passwordVariable: 'TOKEN'
                 )])  {
 
-        sh """curl -L \
+        def response = sh """curl -L \
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer ${TOKEN}" \
         -H "X-GitHub-Api-Version: 2026-03-10" \
