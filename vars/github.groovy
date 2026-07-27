@@ -8,8 +8,8 @@ def gitRepo(Map config) {
                 )])  {
 
 
-        def response = sh(
-            script: """
+                def response = sh(
+                    script: """
                         curl -sL \
                         -H "Accept: application/vnd.github+json" \
                         -H "Authorization: Bearer ${TOKEN}" \
@@ -19,6 +19,10 @@ def gitRepo(Map config) {
                     returnStdout: true
                 ).trim()
 
+                def slurper = new JsonSlurper()
+                def json = slurper.parseText(response)
+
+                return json
         // Kept in case httpRequest is prefered
         //
         // def response = httpRequest(
@@ -31,7 +35,6 @@ def gitRepo(Map config) {
         // def slurper = new JsonSlurper()
 
         // Schlurp before returning
-        return response
     }
 }
 
