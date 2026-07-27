@@ -27,7 +27,7 @@ def gitRepo(Map config) {
 def repoDiscovery() {
     def defaultYamlText = libraryResource('repos.yaml')
     def config = readYaml text: defaultYamlText
-    for (i in config.discovery_config) {
+    for (i in config.discovery_config.repos) {
         echo "current: ${i}"
     }
 }
