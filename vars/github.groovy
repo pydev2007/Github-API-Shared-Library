@@ -1,4 +1,4 @@
-import groovy.json.JsonSlurper
+
 
 def gitRepo(Map config) {
     withCredentials([usernamePassword(
@@ -28,12 +28,10 @@ def gitRepo(Map config) {
         //     validResponseCodes: '200'
         // )
         //
-        def slurper = new JsonSlurper()
-
-        def result = slurper.parseText(response)
+        // def slurper = new JsonSlurper()
 
         // Schlurp before returning
-        return result
+        return response
     }
 
 
