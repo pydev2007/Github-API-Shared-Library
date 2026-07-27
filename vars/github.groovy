@@ -1,4 +1,4 @@
-
+import groovy.json.JsonSlurper
 
 def gitRepo(Map config) {
     withCredentials([usernamePassword(
@@ -27,9 +27,13 @@ def gitRepo(Map config) {
         //     customHeaders: ["Accept: application/vnd.github+json", "Authorization: Bearer ${TOKEN}", "X-GitHub-Api-Version: 2026-03-10"],
         //     validResponseCodes: '200'
         // )
+        //
+        def slurper = new JsonSlurper()
+
+        def result = slurper.parseText(rawText)
 
         // Schlurp before returning
-        return response
+        return result
     }
 
 
