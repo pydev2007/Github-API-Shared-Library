@@ -3,3 +3,5 @@ discovery_config:
     - "Microservice-1"
     - "Microservice-2"
     - "Microservice-3"
+  md_template: |
+      ### pulls ${var}

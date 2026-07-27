@@ -1,5 +1,3 @@
-
-
 def gitRepo(Map config) {
     withCredentials([usernamePassword(
                     credentialsId: 'JenkinsGTTest',
@@ -18,16 +16,17 @@ def gitRepo(Map config) {
                     """,
                     returnStdout: true
                 ).trim()
+
                 def json = readJSON text: response
 
                 return json
     }
 }
 
-def repoDiscovery() {
-    def defaultYamlText = libraryResource('repos.yaml')
-    def config = readYaml text: defaultYamlText
-    for (i in config.discovery_config.repos) {
-        echo "current: ${i}"
-    }
-}
+// def repoDiscovery() {
+//     def defaultYamlText = libraryResource('repos.yaml')
+//     def config = readYaml text: defaultYamlText
+//     for (i in config.discovery_config.repos) {
+//         def release = gitRepo()
+//     }
+// }
