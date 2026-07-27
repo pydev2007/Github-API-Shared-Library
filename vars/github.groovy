@@ -10,7 +10,7 @@ def gitRepo(Map config) {
                     script: """
                         curl -sL \
                         -H "Accept: application/vnd.github+json" \
-                        -H "Authorization: Bearer ${TOKEN}" \
+                        -H "Authorization: Bearer $TOKEN" \
                         -H "X-GitHub-Api-Version: 2022-11-28" \
                         "https://api.github.com/repos/${config.owner}/${config.repo}/${config.path}"
                     """,
@@ -19,29 +19,5 @@ def gitRepo(Map config) {
                 def json = readJSON text: response
 
                 return json
-        // Kept in case httpRequest is prefered
-        //
-        // def response = httpRequest(
-        //     url: "https://api.github.com/repos/${config.owner}/${config.repo}/${config.path}",
-        //     httpMode: 'GET',
-        //     customHeaders: ["Accept: application/vnd.github+json", "Authorization: Bearer ${TOKEN}", "X-GitHub-Api-Version: 2026-03-10"],
-        //     validResponseCodes: '200'
-        // )
-        //
-        // def slurper = new JsonSlurper()
-
-        // Schlurp before returning
     }
-}
-
-def gitRelease(name) {
-
-    def output = gitRepo("owner": "Bindustries", "repo": name, "path": "releases/latest")
-
-    def release = new JsonSlurper().parseText(output)
-
-    return release
-
-
-
 }
