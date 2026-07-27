@@ -1,4 +1,4 @@
-
+import groovy.json.JsonSlurper
 
 def gitRepo(Map config) {
     withCredentials([usernamePassword(
@@ -33,6 +33,16 @@ def gitRepo(Map config) {
         // Schlurp before returning
         return response
     }
+}
+
+def gitRelease(String name) {
+
+    def output = new gitRepo("owner": "Bindustries", "repo": name, "path": "releases/latest")
+
+    def release = new JsonSlurper().parseText(latest)
+
+    return release
+
 
 
 }
