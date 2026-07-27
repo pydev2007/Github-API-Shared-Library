@@ -21,7 +21,7 @@ def gitRepo(Map config) {
         //     validResponseCodes: '200'
         // )
 
-        return response.content
+        return response
     }
 
 
