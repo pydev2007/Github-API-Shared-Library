@@ -28,7 +28,7 @@ def gitRepo(Map config) {
         // )
 
         // Schlurp before returning
-        return JsonSlurper().parseText(response)
+        return new JsonSlurper().parseText(response)
     }
 
 
