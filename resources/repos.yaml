@@ -4,23 +4,39 @@ discovery_config:
     - "Microservice-2"
     - "Microservice-3"
   md_template: |
-      ## ${name}
+      ## ${repo.name}
 
-      <% stats.each { s -> %>
-      - ${s.label}: ${s.value}
-      <% } %>
+      ### Summary
 
-      ${extra}
+      | Metric | Value |
+      |--------|------:|
+      | Commits | ${commits} |
+      | Merged PRs | ${merged_prs} |
+
+      ${repo.extra_metrics}
 
   html_template: |
-      <div class="repo">
-        <h2>${name}</h2>
+      <div class="repository">
+        <h2>${repo.name}</h2>
 
-        <ul>
-        <% stats.each { s -> %>
-          <li><strong>${s.label}:</strong> ${s.value}</li>
-        <% } %>
-        </ul>
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Commits</td>
+              <td>${commits}</td>
+            </tr>
+            <tr>
+              <td>Merged PRs</td>
+              <td>${merged_prs}</td>
+            </tr>
 
-        ${extra}
+            ${repo.extra_metrics}
+          </tbody>
+        </table>
       </div>
