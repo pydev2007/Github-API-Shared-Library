@@ -30,7 +30,7 @@ def gitRepo(Map config) {
         //
         def slurper = new JsonSlurper()
 
-        def result = slurper.parseText(rawText)
+        def result = slurper.parseText(response)
 
         // Schlurp before returning
         return result
