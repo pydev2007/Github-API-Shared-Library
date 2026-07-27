@@ -4,4 +4,23 @@ discovery_config:
     - "Microservice-2"
     - "Microservice-3"
   md_template: |
-      ### pulls ${var}
+      ## ${name}
+
+      <% stats.each { s -> %>
+      - ${s.label}: ${s.value}
+      <% } %>
+
+      ${extra}
+
+  html_template: |
+      <div class="repo">
+        <h2>${name}</h2>
+
+        <ul>
+        <% stats.each { s -> %>
+          <li><strong>${s.label}:</strong> ${s.value}</li>
+        <% } %>
+        </ul>
+
+        ${extra}
+      </div>
