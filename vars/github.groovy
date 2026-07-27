@@ -27,5 +27,5 @@ def gitRepo(Map config) {
 def repoDiscovery() {
     def defaultYamlText = libraryResource('repos.yaml')
     def config = readYaml text: defaultYamlText
-    echo defaultYamlText
+    echo defaultYamlText.discovery_config.repos
 }
