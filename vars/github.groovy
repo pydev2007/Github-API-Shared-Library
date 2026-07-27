@@ -1,9 +1,13 @@
+import groovy.json.JsonSlurper
+
 def gitRepo(Map config) {
     withCredentials([usernamePassword(
                     credentialsId: 'JenkinsGTTest',
                     usernameVariable: 'USER',
                     passwordVariable: 'TOKEN'
                 )])  {
+
+        def json = new JsonSlurper()
 
         def response = sh(
             script: """
@@ -25,7 +29,8 @@ def gitRepo(Map config) {
         //     validResponseCodes: '200'
         // )
 
-        return response
+        // Schlurp before returning
+        return json.parseText(response)
     }
 
 
