@@ -28,6 +28,6 @@ def repoDiscovery() {
     def defaultYamlText = libraryResource('repos.yaml')
     def config = readYaml text: defaultYamlText
     for (i in config.discovery_config) {
-        echo i
+        echo "current: ${i}"
     }
 }
