@@ -39,7 +39,7 @@ def gitRelease(String name) {
 
     def output = new gitRepo("owner": "Bindustries", "repo": name, "path": "releases/latest")
 
-    def release = new JsonSlurper().parseText(latest)
+    def release = new JsonSlurper().parseText(output)
 
     return release
 
