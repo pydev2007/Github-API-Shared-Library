@@ -1,5 +1,3 @@
-import groovy.json.JsonSlurper
-
 def gitRepo(Map config) {
     withCredentials([usernamePassword(
                     credentialsId: 'JenkinsGTTest',
@@ -18,9 +16,7 @@ def gitRepo(Map config) {
                     """,
                     returnStdout: true
                 ).trim()
-
-                def slurper = new JsonSlurper()
-                def json = slurper.parseText(response)
+                def json = readJSON text: response
 
                 return json
         // Kept in case httpRequest is prefered
