@@ -1,3 +1,5 @@
+
+
 def gitRepo(Map config) {
     withCredentials([usernamePassword(
                     credentialsId: 'JenkinsGTTest',
@@ -20,4 +22,10 @@ def gitRepo(Map config) {
 
                 return json
     }
+}
+
+def repoDiscovery() {
+    def defaultYamlText = libraryResource('repos.yaml')
+    def config = readYaml text: defaultYamlText
+    echo defaultYamlText
 }
