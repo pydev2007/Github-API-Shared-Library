@@ -35,7 +35,7 @@ def gitRepo(Map config) {
     }
 }
 
-def gitRelease(String name) {
+def gitRelease(name) {
 
     def output = gitRepo("owner": "Bindustries", "repo": name, "path": "releases/latest")
 
