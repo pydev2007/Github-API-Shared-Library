@@ -7,8 +7,6 @@ def gitRepo(Map config) {
                     passwordVariable: 'TOKEN'
                 )])  {
 
-        def json = new JsonSlurper()
-
         def response = sh(
             script: """
                         curl -sL \
@@ -30,7 +28,7 @@ def gitRepo(Map config) {
         // )
 
         // Schlurp before returning
-        return json.parseText(response)
+        return JsonSlurper().parseText(response)
     }
 
 
