@@ -6,7 +6,7 @@ discovery_config:
 
   html_template: |
       <div class="repository">
-        <h2>${repo.name}</h2>
+        <h2><a href="${url}">${repo.name}</a></h2>
         <h3>Commits</h3>
         <p>${commits}</p>
       </div>
