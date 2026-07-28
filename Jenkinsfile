@@ -12,13 +12,13 @@ pipeline {
 
                     for (repo in config.discovery_config.repos) {
 
-                        def release = github.gitRepo(
+                        def release = git.gitRepo(
                             owner: "ORG OR USER HERE",
                             repo: repo,
                             path: "releases/latest"
                         )
 
-                        def compare = github.gitRepo(
+                        def compare = git.gitRepo(
                             owner: "ORG OR USER HERE",
                             repo: repo,
                             path: "compare/${release.name}...main" // "main" may change depending on the brach you want to compare.
