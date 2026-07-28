@@ -8,5 +8,5 @@ discovery_config:
       <div class="repository">
         <h2>${repo.name}</h2>
         <h3>Commits</h3>
-        <p>${commits</p>
+        <p>${commits}</p>
       </div>
