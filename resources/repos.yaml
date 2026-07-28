@@ -3,40 +3,10 @@ discovery_config:
     - "Microservice-1"
     - "Microservice-2"
     - "Microservice-3"
-  md_template: |
-      ## ${repo.name}
-
-      ### Summary
-
-      | Metric | Value |
-      |--------|------:|
-      | Commits | ${commits} |
-      | Merged PRs | ${merged_prs} |
-
-      ${repo.extra_metrics}
 
   html_template: |
       <div class="repository">
         <h2>${repo.name}</h2>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Metric</th>
-              <th>Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Commits</td>
-              <td>${commits}</td>
-            </tr>
-            <tr>
-              <td>Merged PRs</td>
-              <td>${merged_prs}</td>
-            </tr>
-
-            ${repo.extra_metrics}
-          </tbody>
-        </table>
+        <h3>Commits</h3>
+        <p>${commits</p>
       </div>
