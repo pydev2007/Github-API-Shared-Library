@@ -10,7 +10,7 @@ pipeline {
 
                     def html = ""
 
-                    for (repo in config.discovery_config.repos) {
+                    for (repo in config.repos) {
 
                         def release = git.gitRepo(
                             owner: "ORG OR USER HERE",
