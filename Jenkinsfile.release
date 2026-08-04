@@ -24,12 +24,16 @@ pipeline {
                         parameters: parameters
                     )
 
+                    releaseLog = ''
+
                     selections.each { repoName, action ->
+
                         def release = git.gitRepo(
-                            owner: "bindustries",
+                            owner: "ORG NAME",
                             repo: repoName,
                             path: "releases/latest"
                         )
+
                         def version = release.tag_name
                                       .drop(1)
                                       .tokenize(".")
@@ -41,25 +45,51 @@ pipeline {
                             version[1] = 0
                             version[2] = 0
                             echo "${git.createRelease(repoName, version)}"
+                            releaseLog += "${repoName}\n${release.tag_name} -> v${version.join('.')}  \n\n"
                         }
                         else if (action == "Minor") {
                             echo "Minor release"
                             version[1] += 1
                             version[2] = 0
                             echo "${git.createRelease(repoName, version)}"
+                            releaseLog += "${repoName}\n${release.tag_name} -> v${version.join('.')}  \n\n"
                         }
                         else if (action == "Patch") {
                             echo "Patch release"
                             version[2] += 1
                             echo "${git.createRelease(repoName, version)}"
+                            releaseLog += "${repoName}\n${release.tag_name} -> v${version.join('.')}  \n\n"
                         }
                         else if (action == "None") {
                             echo "No release needed. Skipping"
                         }
                         echo "${repoName} release ${version}"
+
+
                     }
+
+                    echo releaseLog
+
+                    echo "Action map: ${selections}"
+
+                }
+
+                writeFile(file: 'Releaselog.txt', text: releaseLog)
+                archiveArtifacts artifacts: 'Releaselog.txt'
+
                 }
             }
+        }
+    }
+    post {
+        success {
+            emailext(
+                subject: "SUCCESS - Release Pipeline",
+                mimeType: "text/html",
+                attachmentsPattern: "Releaselog.txt",
+                to: "YOUR EMAIL",
+                body: "<h2>SUCCESS - Release Pipeline</h2>")
+            cleanWs()
         }
     }
 }
