@@ -28,6 +28,11 @@ pipeline {
 
                     selections.each { repoName, action ->
 
+                        if (action == "None") { // Return if the action is none so API calls aren't wasted.
+                            echo "None. Returning ${repoName}"
+                            return
+                        }
+
                         def release = git.gitRepo(
                             owner: "ORG NAME",
                             repo: repoName,
@@ -47,6 +52,7 @@ pipeline {
                                 version[2] = 0
                                 echo "${git.createRelease(repoName, version)}"
                                 releaseLog += "${repoName}\n${release.tag_name} -> v${version.join('.')}  \n\n"
+                                return
 
                             case "Minor":
                                 echo "Minor release"
@@ -54,12 +60,15 @@ pipeline {
                                 version[2] = 0
                                 echo "${git.createRelease(repoName, version)}"
                                 releaseLog += "${repoName}\n${release.tag_name} -> v${version.join('.')}  \n\n"
+                                return
 
                             case "Patch":
                                 echo "Patch release"
                                 version[2] += 1
                                 echo "${git.createRelease(repoName, version)}"
                                 releaseLog += "${repoName}\n${release.tag_name} -> v${version.join('.')}  \n\n"
+                                return
+
                             default:
                                 echo "No release needed. Skipping"
                         }
