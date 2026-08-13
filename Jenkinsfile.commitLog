@@ -1,5 +1,7 @@
 @Library("YOUR LIBRARY") _
 
+def name = "audit"
+
 pipeline {
     agent { label 'YOUR NODE' }
 
@@ -15,7 +17,7 @@ pipeline {
                 script {
                     def config = readYaml text: libraryResource('repos.yaml')
                     def repos = params.REPOS ? params.REPOS.split('\\s*,\\s*') : config.discovery_config.repos
-                    def name = params.NAME ? params.NAME : new Date().format("yyyy-MM-dd-HH:mm:ss")
+                    name = params.NAME ? params.NAME : new Date().format("yyyy-MM-dd-HH:mm:ss")
                     def dataArg = params.ARGS ? params.ARGS : "\$(git describe --tags --abbrev=0)..HEAD"
 
                     echo "${config.discovery_config.repos}"
@@ -28,21 +30,28 @@ pipeline {
                     // For every repo, git log and append a csv
                     for (repo in repos) {
                         echo repo
-                        dir(repo) {
-                            checkout([
-                                $class: 'GitSCM',
-                                branches: [[name: 'main']],
-                                userRemoteConfigs: [[
-                                    url: "https://github.com/YOUR ORG/${repo}",
-                                    credentialsId: 'YOUR CRED ID' // I used the Github app
-                                ]]
-                            ])
+                        try {
+                            dir(repo) {
+                                checkout([
+                                    $class: 'GitSCM',
+                                    branches: [[name: 'main']],
+                                    userRemoteConfigs: [[
+                                        url: "https://github.com/YOUR ORG/${repo}",
+                                        credentialsId: 'YOUR CRED ID' // I used the Github app
+                                    ]]
+                                ])
 
-                            sh """
-                                ls
-                                git log ${dataArg} --all --pretty=format:'"$repo","%H","%an","%ae","%aI","%cn","%ce","%cI","%P","%D","%s"' >> ../${name}.csv
-                                echo >> ../${name}.csv
-                            """
+                                sh """
+                                    ls
+                                    git log ${dataArg} --all --pretty=format:'"$repo","%H","%an","%ae","%aI","%cn","%ce","%cI","%P","%D","%s"' >> ../${name}.csv
+                                    echo >> ../${name}.csv
+                                """
+                            } catch (Exception err) {
+                                echo "Unable to run git on ${repo}."
+                                echo "Error type: ${err.getClass().getName()}"
+                                echo "Error message: ${err.getMessage()}"
+                                currentBuild.result = 'UNSTABLE'
+                            }
                             echo "${repo}"
                         }
                     }
@@ -53,6 +62,12 @@ pipeline {
         }
     post {
         always {
+            emailext(
+                subject: "SUCCESS - Commit Log",
+                mimeType: "text/html",
+                attachmentsPattern: "${name}.csv",
+                to: "YOUR EMAIL",
+                body: "<h2>SUCCESS - Commit Log</h2>")
             cleanWs()
         }
     }
