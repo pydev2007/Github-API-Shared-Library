@@ -18,7 +18,7 @@
      ] + config
 
      withCredentials([usernamePassword(
-         credentialsId: 'JenkinsGTTest',
+         credentialsId: 'YOUR CRED ID',
          usernameVariable: 'USER',
          passwordVariable: 'TOKEN'
      )]) {
@@ -53,7 +53,7 @@
 def createRelease(repo, version) {
     gitRepo(
          method: "POST",
-         owner: "bindustries",
+         owner: "YOUR ORG NAME",
          repo: repo,
          path: "releases",
          body: """{

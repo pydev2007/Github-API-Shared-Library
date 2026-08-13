@@ -1,0 +1,59 @@
+@Library("YOUR LIBRARY") _
+
+pipeline {
+    agent { label 'YOUR NODE' }
+
+    parameters {
+        string(name: 'ARGS', defaultValue: '', description: 'git log addtional arguments.')
+        string(name: 'NAME', defaultValue: '', description: 'Name of the csv output file.')
+        string(name: 'REPOS', defaultValue: '', description: 'Manually use repos. Use commas to seperate with no spaces.')
+    }
+
+    stages {
+        stage('Log commits') {
+            steps {
+                script {
+                    def config = readYaml text: libraryResource('repos.yaml')
+                    def repos = params.REPOS ? params.REPOS.split('\\s*,\\s*') : config.discovery_config.repos
+                    def name = params.NAME ? params.NAME : new Date().format("yyyy-MM-dd-HH:mm:ss")
+                    def dataArg = params.ARGS ? params.ARGS : "\$(git describe --tags --abbrev=0)..HEAD"
+
+                    echo "${config.discovery_config.repos}"
+
+                    // Initial header
+                    sh """
+                        echo '"repository","commit_sha","author_name","author_email","author_date","committer_name","committer_email","committer_date","parent_commits","refs","commit_subject"' > ${name}.csv
+                    """
+
+                    // For every repo, git log and append a csv
+                    for (repo in repos) {
+                        echo repo
+                        dir(repo) {
+                            checkout([
+                                $class: 'GitSCM',
+                                branches: [[name: 'main']],
+                                userRemoteConfigs: [[
+                                    url: "https://github.com/YOUR ORG/${repo}",
+                                    credentialsId: 'YOUR CRED ID' // I used the Github app
+                                ]]
+                            ])
+
+                            sh """
+                                ls
+                                git log ${dataArg} --all --pretty=format:'"$repo","%H","%an","%ae","%aI","%cn","%ce","%cI","%P","%D","%s"' >> ../${name}.csv
+                                echo >> ../${name}.csv
+                            """
+                            echo "${repo}"
+                        }
+                    }
+                    archiveArtifacts artifacts: "${name}.csv"
+                    }
+                }
+            }
+        }
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
