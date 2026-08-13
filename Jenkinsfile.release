@@ -39,29 +39,29 @@ pipeline {
                                       .tokenize(".")
                                       .collect { it.toInteger() }
 
-                        if (action == "Major") {
-                            echo "Major release"
-                            version[0] += 1
-                            version[1] = 0
-                            version[2] = 0
-                            echo "${git.createRelease(repoName, version)}"
-                            releaseLog += "${repoName}\n${release.tag_name} -> v${version.join('.')}  \n\n"
-                        }
-                        else if (action == "Minor") {
-                            echo "Minor release"
-                            version[1] += 1
-                            version[2] = 0
-                            echo "${git.createRelease(repoName, version)}"
-                            releaseLog += "${repoName}\n${release.tag_name} -> v${version.join('.')}  \n\n"
-                        }
-                        else if (action == "Patch") {
-                            echo "Patch release"
-                            version[2] += 1
-                            echo "${git.createRelease(repoName, version)}"
-                            releaseLog += "${repoName}\n${release.tag_name} -> v${version.join('.')}  \n\n"
-                        }
-                        else if (action == "None") {
-                            echo "No release needed. Skipping"
+                        switch(action) {
+                            case "Major":
+                                echo "Major release"
+                                version[0] += 1
+                                version[1] = 0
+                                version[2] = 0
+                                echo "${git.createRelease(repoName, version)}"
+                                releaseLog += "${repoName}\n${release.tag_name} -> v${version.join('.')}  \n\n"
+
+                            case "Minor":
+                                echo "Minor release"
+                                version[1] += 1
+                                version[2] = 0
+                                echo "${git.createRelease(repoName, version)}"
+                                releaseLog += "${repoName}\n${release.tag_name} -> v${version.join('.')}  \n\n"
+
+                            case "Patch":
+                                echo "Patch release"
+                                version[2] += 1
+                                echo "${git.createRelease(repoName, version)}"
+                                releaseLog += "${repoName}\n${release.tag_name} -> v${version.join('.')}  \n\n"
+                            default:
+                                echo "No release needed. Skipping"
                         }
                         echo "${repoName} release ${version}"
 
