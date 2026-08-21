@@ -1,0 +1,116 @@
+@Library("SHARED LIBRARY") _
+
+// Globals
+def branchName
+def urls = ""
+def submodules
+
+
+// This pipeline creates a branch before pulling the latest commit of a submodule.
+// Then creates a pull request to add the updated submodule into main.
+pipeline {
+    agent { label 'YOUR AGENT' }
+
+    parameters {
+        choice(name: 'SUBMODULE', choices: ['submodule-1', 'submodule-2'], description: 'Select a submodule')
+    }
+
+    stages {
+        stage('Pull Submodule') {
+            steps {
+                script {
+
+                branchName = "update-${params.SUBMODULE}-${new Date().format('yyyy-MM-dd-HH-mm')}"
+                submodules = config.submodules
+
+                def config = readYaml text: libraryResource('repos.yaml')
+
+                for (repo in submodules[params.SUBMODULE]) {
+                    echo repo
+                    try {
+                    dir(repo) {
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: '*/main']],
+                            userRemoteConfigs: [[
+                                url: "https://github.com/YOUR ORG/${repo}.git",
+                                credentialsId: 'YOUR CRED ID'
+                            ]],
+                            doGenerateSubmoduleConfigurations: false,
+                            extensions: [[
+                                $class: 'SubmoduleOption',
+                                disableSubmodules: false,
+                                parentCredentials: true, // Uses the parent repo credentials for the submodules
+                                recursiveSubmodules: true,
+                                reference: '',
+                                trackingSubmodules: false
+                            ]],
+                            submoduleCfg: [],
+                        ])
+                        sh 'ls'
+                        withCredentials([gitUsernamePassword(credentialsId: 'YOUR CRED ID')]) {
+                            // Putting your own username or a company one is recommeded, as it will show in the github commit.
+                            withEnv([
+                                        'GIT_AUTHOR_NAME=Your USER',
+                                        'GIT_AUTHOR_EMAIL=YOUR EMAIL',
+                                        'GIT_COMMITTER_NAME=Your USER',
+                                        'GIT_COMMITTER_EMAIL=YOUR EMAIL'
+                            ]) {
+                                sh "git checkout -b ${branchName}"
+                                dir(params.SUBMODULE) {
+                                    sh """
+                                    git submodule update --init --recursive
+                                    git fetch
+                                    git pull origin main
+                                    cat README.md
+                                    """
+                                }
+
+                                sh """
+                                git add .
+                                git commit -m "Updating submodule"
+                                git push -u origin ${branchName}
+                                """
+                            }
+
+                        }
+                        }
+                    } catch (Exception err) {
+                        echo "Unable to git log. Are the argumets correct? ${err}"
+                        currentBuild.result = 'UNSTABLE'
+                    }
+                }
+            }
+        }
+        }
+        stage('Create PR') {
+            steps {
+                script {
+                    for (repo in submodules[params.SUBMODULE]) {
+                        def test = git.createPullRequest(repo,
+                        branchName,
+                        "Updating ${params.SUBMODULE}",
+                        "Merging updated submodule into main")
+                        urls += "${test.html_url}\n"
+                        echo "${urls}"
+                    }
+                }
+            }
+        }
+        }
+
+    post {
+        always {
+            emailext(
+                subject: "SUCCESS - Release Pipeline",
+                mimeType: "text/html",
+                to: "YOUR EMAIL",
+                body: """
+                <h2>SUCCESS - Pull Submodule Pipeline</h2>
+                <br>
+                <p>${submodules}<p>
+                """)
+            cleanWs()
+        }
+    }
+}

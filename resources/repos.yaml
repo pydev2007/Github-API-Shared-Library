@@ -10,3 +10,10 @@ discovery_config:
         <h3>Commits</h3>
         <p>${commits}</p>
       </div>
+
+submodules:
+  submodule-test:
+    - "Microservice-3"
+    - "Microservice-2"
+  submodule-test1:
+    - "Microservice-2"
