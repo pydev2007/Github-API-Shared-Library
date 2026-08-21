@@ -12,8 +12,8 @@ discovery_config:
       </div>
 
 submodules:
-  submodule-test:
+  submodule-1:
     - "Microservice-3"
     - "Microservice-2"
-  submodule-test1:
+  submodule-2:
     - "Microservice-2"
