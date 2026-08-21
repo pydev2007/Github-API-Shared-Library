@@ -67,3 +67,23 @@ def createRelease(repo, version) {
          }"""
     )
 }
+
+
+/**
+  * Pre-filled function for creating a new release with semantic versioning.
+  *
+  * @param config A map that contains the config for the Github API:
+  *   - `repo` (String): The repo to create a release on. *Required*.
+  *   - `branch` (String): The branch you're merging into main. *Required*.
+  *   - `title` (String): Title of the pull request. *Required*.
+  *   - `body` (String): Body of the pull request. *Required*.
+  */
+def createPullRequest(repo, branch, title, body) {
+     gitRepo(
+     method: "POST",
+     owner: "YOUR ORG NAME",
+     repo: repo,
+     path: "pulls",
+     body: """{"title":"${title}","body":"${body}","head":"${branch}","base":"main"}"""
+     )
+}
