@@ -21,9 +21,8 @@ pipeline {
                 script {
 
                 branchName = "update-${params.SUBMODULE}-${new Date().format('yyyy-MM-dd-HH-mm')}"
-                submodules = config.submodules
-
                 def config = readYaml text: libraryResource('repos.yaml')
+                submodules = config.submodules
 
                 for (repo in submodules[params.SUBMODULE]) {
                     echo repo
@@ -108,7 +107,7 @@ pipeline {
                 body: """
                 <h2>SUCCESS - Pull Submodule Pipeline</h2>
                 <br>
-                <p>${submodules}<p>
+                <p>${urls}<p>
                 """)
             cleanWs()
         }
