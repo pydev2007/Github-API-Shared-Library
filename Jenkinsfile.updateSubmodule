@@ -100,7 +100,7 @@ pipeline {
         }
 
     post {
-        always {
+        success {
             emailext(
                 subject: "SUCCESS - Release Pipeline",
                 mimeType: "text/html",
