@@ -1,5 +1,6 @@
 @Library("shared-library@YOUR SHARED REPO/BRANCH") _
 
+// This pipeline grabs the amount of commits to a branch or repo.
 pipeline {
     agent { label 'YOUR AGENT HERE' }
     stages {
@@ -47,6 +48,14 @@ pipeline {
     }
 
     post {
+        failure {
+            emailext(
+                subject: "FAILURE - Discovery Pipeline",
+                mimeType: "text/html",
+                to: "YOUR EMAIL",
+                body: "<h2>FAILURE - Discovery Pipeline</h2>")
+            cleanWs()
+        }
         success {
             publishHTML(target: [
                 allowMissing: false,

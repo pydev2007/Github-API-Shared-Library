@@ -61,7 +61,15 @@ pipeline {
             }
         }
     post {
-        always {
+        failure {
+            emailext(
+                subject: "FAILURE - Commit Log",
+                mimeType: "text/html",
+                to: "YOUR EMAIL",
+                body: "<h2>FAILURE - Commit Log</h2>")
+            cleanWs()
+        }
+        success {
             emailext(
                 subject: "SUCCESS - Commit Log",
                 mimeType: "text/html",

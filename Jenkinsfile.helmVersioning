@@ -1,0 +1,130 @@
+@Library("YOUR LIBRARY") _
+
+def url
+def mapTest = [:]
+def yaml
+def repo = "YOUR REPO"
+
+pipeline {
+    agent { label 'YOUR AGENT' }
+    parameters {
+        string(name: 'NAME', defaultValue: '', description: 'Name of the folder for release')
+    }
+    stages {
+        stage('Copy') {
+            steps {
+                script {
+                    name = params.NAME ? params.NAME : new Date().format("yyyy.MM.dd")
+                    branchName = "update-helm-dependencies-${new Date().format('yyyy-MM-dd-HH-mm')}"
+
+
+                    dir("${repo}") {
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: 'main']],
+                            userRemoteConfigs: [[
+                                url: "https://github.com/ORG_NAME/${repo}",
+                                credentialsId: 'YOUR CREDS'
+                            ]]
+                        ])
+                        // Copy staging to prod and change the ACR to prod ACR
+                        sh """
+                            ls
+                            cp helm/environments/stage/Chart.yaml helm/environments/prod/Chart.yaml
+                            sed -i \'s/STAGING_ACR/PROD_ACR/g\' helm/environments/prod/Chart.yaml
+                        """
+
+                        // Adding updated versions and names to map for values.yaml
+                        yaml = readYaml file: "helm/environments/prod/Chart.yaml"
+                        for (i in yaml.dependencies) {
+                            sh "echo ${i.name}"
+                            mapTest.put(i.name, i.version)
+                        }
+
+                        sh """
+                        echo ${mapTest}
+                        cat helm/environments/stage/Chart.yaml
+                        """
+
+                        yaml = readYaml file: "helm/environments/prod/values.yaml"
+
+                        // Split at the colon and replce with the correct version
+                        yaml.each { name, config ->
+                            if (mapTest.containsKey(name) && config.image) {
+                                def image = config.image.split(':')[0]
+                                config.image = "${image}:${mapTest[name]}"
+
+                                echo "Updated ${name}: ${config.image}"
+                            }
+                        }
+
+                        writeYaml(
+                            file: "helm/environments/prod/values.yaml",
+                            data: yaml,
+                            overwrite: true
+                        )
+
+                        // Copy updated files and staging to releases with an optional name
+                        sh """
+                            cp -r helm/environments/prod/ helm/releases/prod/${name}/
+                            cp -r helm/environments/stage/ helm/releases/stage/${name}/
+                            ls helm/environments/prod
+                            cat helm/environments/prod/values.yaml
+                        """
+
+                        withCredentials([gitUsernamePassword(credentialsId: 'YOUR CREDS')]) {
+                            // Add your automated naming setup.
+                            // For this example I used the name of my app with gmail at the end.
+                            withEnv([
+                                'GIT_AUTHOR_NAME=yetanothergtjenkinstest',
+                                'GIT_AUTHOR_EMAIL=yetanothergtjenkinstest@gmail.com',
+                                'GIT_COMMITTER_NAME=yetanothergtjenkinstest',
+                                'GIT_COMMITTER_EMAIL=yetanothergtjenkinstest@gmail.com'
+                            ]) {
+                            sh """
+                                git checkout -b ${branchName}
+                                git add .
+                                git commit -m 'Updating dependencies'
+                                git push -u origin ${branchName}
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('Create PR') {
+                steps {
+                    script {
+                        def pr = git.createPullRequest("${repo}",
+                            branchName,
+                            "Promoting staging version to prod",
+                            "Merging new chart dependency versions")
+                        url = pr.html_url
+                    }
+                }
+            }
+        }
+
+        post {
+            failure {
+                emailext(
+                    subject: "FAILURE - Dependency update",
+                    mimeType: "text/html",
+                    to: "YOUR EMAIL",
+                    body: "<h2>FAILURE - Dependency update</h2>")
+                cleanWs()
+            }
+        success {
+            emailext(
+                subject: "SUCCESS - Dependency update",
+                mimeType: "text/html",
+                to: "YOUR EMAIL",
+                body: """
+                <h2>SUCCESS - Dependency update</h2>
+                <br>
+                <p>${url}<p>""")
+            cleanWs()
+        }
+    }
+}

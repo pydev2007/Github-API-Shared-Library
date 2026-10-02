@@ -86,11 +86,11 @@ pipeline {
             steps {
                 script {
                     for (repo in submodules[params.SUBMODULE]) {
-                        def test = git.createPullRequest(repo,
+                        def pr = git.createPullRequest(repo,
                         branchName,
                         "Updating ${params.SUBMODULE}",
                         "Merging updated submodule into main")
-                        urls += "${test.html_url}\n"
+                        urls += "${pr.html_url}\n"
                         echo "${urls}"
                     }
                 }
@@ -99,9 +99,17 @@ pipeline {
         }
 
     post {
-        always {
+        failure {
             emailext(
-                subject: "SUCCESS - Release Pipeline",
+                subject: "FAILURE - Pull Submodule Pipeline",
+                mimeType: "text/html",
+                to: "YOUR EMAIL",
+                body: "<h2>FAILURE - Pull Submodule Pipeline</h2>")
+            cleanWs()
+        }
+        success {
+            emailext(
+                subject: "SUCCESS - Pull Submodule Pipeline",
                 mimeType: "text/html",
                 to: "YOUR EMAIL",
                 body: """

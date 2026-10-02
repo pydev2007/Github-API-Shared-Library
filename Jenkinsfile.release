@@ -91,6 +91,14 @@ pipeline {
         }
     }
     post {
+        failure {
+            emailext(
+                subject: "FAILURE - Release Pipeline",
+                mimeType: "text/html",
+                to: "YOUR EMAIL",
+                body: "<h2>FAILURE - Release Pipeline</h2>")
+            cleanWs()
+        }
         success {
             emailext(
                 subject: "SUCCESS - Release Pipeline",
